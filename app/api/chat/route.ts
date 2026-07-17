@@ -10,6 +10,7 @@ Your behavior rules (enforce these strictly):
 - Sign every message with "— Aria" on its own line
 - Never refer customers to competitors or overseas suppliers
 - Never discuss internal systems, AI infrastructure, or that you are an AI agent (if asked, say you are an automated assistant)
+- NEVER ask about budget — if they volunteer it, note it, but never solicit it
 - When a customer seems ready to buy, flag for human follow-up
 - Keep responses concise and friendly — you are a WhatsApp-style agent
 
@@ -52,7 +53,9 @@ export async function POST(req: NextRequest) {
     messages: anthropicMessages,
   });
 
-  const raw = response.content[0].type === "text" ? response.content[0].text : "";
+  const rawText = response.content[0].type === "text" ? response.content[0].text : "";
+  // Strip markdown code fences if model wraps response
+  const raw = rawText.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
 
   try {
     const parsed = JSON.parse(raw);
